@@ -7,15 +7,17 @@ class RingCipher
 {
 private:
     const string Alphabet = {"abcYZuvwxyzABC.'hijk-_=+*TUVWX$#@~`!?,^%defgt0123456789Dplmno\"\\;<>|qrsEFGHIJKLMNOPQRS"};
-    const int Key2{13};
     const int Key1{14};
+    const int Key2{13};
+    int NewKey{Key2};
 
-    string Encode(const string &Message)
+    string Encrypt(const string &Message)
     {
-        string Output1{};
         string Output{};
+        string Output1{};
+        string Output2{};
 
-        // Level 1
+        // Layer 1
         for (auto &x : Message)
         {
             // Guarding for escape sequences
@@ -23,24 +25,33 @@ private:
             {
                 continue;
             }
+
             Output1 += Alphabet[((Alphabet.find(x) + Key1) < Alphabet.length()) ? (Alphabet.find(x) + Key1) : ((Alphabet.find(x) + Key1) - Alphabet.length())];
         }
 
-        // Level 2
+        // Layer 2
         for (auto &x : Output1)
         {
-
-            Output += Alphabet[(((Alphabet.find(x) ^ Key2) < Alphabet.length()) ? ((Alphabet.find(x) ^ Key2)) : (Alphabet.find(x)))];
+            Output2 += Alphabet[(((Alphabet.find(x) ^ Key2) < Alphabet.length()) ? ((Alphabet.find(x) ^ Key2)) : (Alphabet.find(x)))];
         }
+
+        // Layer 3
+        for (auto &x : Output2)
+        {
+            Output += Alphabet[((Alphabet.find(x) ^ NewKey) < Alphabet.length()) ? (Alphabet.find(x) ^ NewKey) : (Alphabet.find(x))];
+            NewKey = (Alphabet.find(x));
+        }
+
         return Output;
     }
 
-    string Decode(const string &Message)
+    string Decrypt(const string &Message)
     {
-        string Output1{};
         string Output{};
+        string Output1{};
+        string Output2{};
 
-        // Level 2
+        // Layer 3
         for (auto &x : Message)
         {
             // Guarding for escape sequences
@@ -49,11 +60,18 @@ private:
                 continue;
             }
 
-            Output1 += Alphabet[(((Alphabet.find(x) ^ Key2) < Alphabet.length()) ? ((Alphabet.find(x) ^ Key2)) : (Alphabet.find(x)))];
+            Output1 += Alphabet[((Alphabet.find(x) ^ NewKey) < Alphabet.length()) ? (Alphabet.find(x) ^ NewKey) : (Alphabet.find(x))];
+            NewKey = ((Alphabet.find(x) ^ NewKey) < Alphabet.length()) ? (Alphabet.find(x) ^ NewKey) : (Alphabet.find(x));
         }
 
-        // Level 1
+        // Layer 2
         for (auto &x : Output1)
+        {
+            Output2 += Alphabet[(((Alphabet.find(x) ^ Key2) < Alphabet.length()) ? ((Alphabet.find(x) ^ Key2)) : (Alphabet.find(x)))];
+        }
+
+        // Layer 1
+        for (auto &x : Output2)
         {
             Output += Alphabet[((Alphabet.find(x) - Key1 + Alphabet.length()) < Alphabet.length()) ? ((Alphabet.find(x) - Key1) + Alphabet.length()) : (Alphabet.find(x) - Key1)];
         }
@@ -69,10 +87,10 @@ public:
         {
 
         case '~':
-            Output = Encode(Message.substr(0, Message.length() - 1));
+            Output = Encrypt(Message.substr(0, Message.length() - 1));
             break;
         case '`':
-            Output = Decode(Message.substr(0, Message.length() - 1));
+            Output = Decrypt(Message.substr(0, Message.length() - 1));
             break;
         default:
             return Message;
