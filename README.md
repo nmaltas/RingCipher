@@ -1,5 +1,5 @@
 # RingCipher
-Small personal project for simplistic multi-layer (3) encryption/decryption algorithm implementation while also featuring variable-key encryption.
+Small personal project for symmetric multi-layer (3) encryption/decryption algorithm implementation, while also featuring variable stream cipher encryption.
 
 When passing a string to the Run() method either append '~' at its end for encryption or '`' for decryption.
 
